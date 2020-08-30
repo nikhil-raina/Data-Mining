@@ -22,7 +22,7 @@ def todays_date():
 
 
 def read_and_print_csv_file():
-  file = open('Data-Mining\\HW 00\\A_DATA_FILE.csv')
+  file = open('A_DATA_FILE.csv')
   csv_reader = csv.reader(file, delimiter=',')
   row_counter = 0
   column_counter = 0
