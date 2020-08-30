@@ -1,3 +1,5 @@
+# Method that adjusts the each line so that escape sequence characters are 
+#   recognized and are still printable in the final code
 def string_adjustment(line):
   new_string = ''
   delimitters = '\'\\'
@@ -11,6 +13,8 @@ def string_adjustment(line):
     
   return new_string
 
+# Method that reads lines from a file and then attaches the write() function
+#   to it and writes it to another file.
 def program_writer():
   reading_file = open('mock.py', 'r')
   writer_file = open('HW_00_Raina_Nikhil_Mentor.py','wt')
