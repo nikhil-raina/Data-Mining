@@ -1,6 +1,8 @@
 function HW01_RAINA_Nikhil_program()
     data_table = data_analysis();
-    Otsu(data_table);
+    new_age_table = readtable('Abominable_Data_For_Clustering__v44.csv');
+    %new_age_table.Age
+    Otsu(new_age_table);
 end
 
 function data_table = data_analysis()
