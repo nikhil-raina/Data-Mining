@@ -20,7 +20,13 @@ def make_dataFrame(fileName):
     return dataFrame
 
 """
+Return the total number of values that are less than or equal to the current 
+threshold in the current feature data being passed in
 
+feature_data: feature data being passed in
+current_threshold: the current threshold with regards to the feature data
+target: [Assam or Bhuttan]
+target_attr_category_data: The list of the Class column 
 """
 def less_than_sum_categories(feature_data, current_threshold, target, target_attr_category_data):
     total = 0
@@ -30,8 +36,15 @@ def less_than_sum_categories(feature_data, current_threshold, target, target_att
                 total += 1
     return total
 
-"""
 
+"""
+Return the total number of values that are greater than the current threshold in the
+current feature data being passed in
+
+feature_data: feature data being passed in
+current_threshold: the current threshold with regards to the feature data
+target: [Assam or Bhuttan]
+target_attr_category_data: The list of the Class column 
 """
 def greater_than_sum_categories(feature_data, current_threshold, target, target_attr_category_data):
     total = 0
@@ -43,7 +56,11 @@ def greater_than_sum_categories(feature_data, current_threshold, target, target_
     
 
 """
+Finds the best gini index and the threshold of the current data entered.
 
+target_attr_category_data: The current node or the dataset of the Class column
+feature_data: current feature data
+target_attr_categories: [Assam, Bhuttan]
 """
 def best_threshold_gini_index(target_attr_category_data, feature_data, target_attr_categories):
     min_value = min(feature_data)
@@ -70,8 +87,12 @@ def best_threshold_gini_index(target_attr_category_data, feature_data, target_at
 
     return (gini_index, best_threshold)
 
-"""
 
+"""
+finds the sum of the target_attr [Assam or Bhuttan] from the data entered
+
+data: The current node or the dataset of the Class column
+target_attr: [Assam or Bhuttan]
 """
 def attr_sum(data, target_attr):
     total = 0
@@ -80,9 +101,14 @@ def attr_sum(data, target_attr):
             total += 1
     return total
 
+
 """
 Splits the current dataset, from the left, with respect to the current best 
 feature till the threshold and returns the dataset
+
+data: The current node or the dataset
+curr_best_feature: the current best feature from the current dataset
+threshold: the threshold 
 """
 def data_parser_left(data, curr_best_feature, threshold):
     target_data = data[curr_best_feature]
@@ -98,6 +124,10 @@ def data_parser_left(data, curr_best_feature, threshold):
 """
 Splits the current dataset, from the left, with respect to the current best 
 feature till the threshold and returns the dataset
+
+data: The current node or the dataset
+curr_best_feature: the current best feature from the current dataset
+threshold: the threshold 
 """
 def data_parser_right(data, curr_best_feature, threshold):
     target_data = data[curr_best_feature]
@@ -109,10 +139,17 @@ def data_parser_right(data, curr_best_feature, threshold):
                 book[feature].append(data[feature][count])
     return book
 
-"""
 
 """
-def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth): # 3rd parameter should be the file writer object
+Decision tree algorithm for classification
+
+data: The current node or the dataset
+tab_sequence: Number of tabs to be added to the file when writing the trainer 
+target_attr_categories: [Assam, Bhuttan]
+file_obj: file obj where the data will be written to
+depth: recursive depth
+"""
+def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth):
     attr_1 = attr_sum(data["class"], target_attr_categories[0])     # total number of values matching attr 1 in the dataset
     attr_2 = len(data["class"]) - attr_1                            # total number of values matching attr 2 in the dataset
 
@@ -120,7 +157,7 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth): 
     # -> size of the node [current dataset] < 10
     # -> node [current dataset] > 95% of a specific class
     # -> tree depth of 10
-    if len(data["class"]) < 10 or (attr_1/len(data["class"]) > 0.95 or attr_2/len(data["class"])) > 0.95 or depth == 2:
+    if len(data["class"]) < 10 or (attr_1/len(data["class"]) > 0.95 or attr_2/len(data["class"])) > 0.95 or depth == 4:
         for tab_count in range(tab_sequence):
             file_obj.write('\t')
         out = 1
@@ -136,24 +173,27 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth): 
     best_attr = ["", 0, 0.5]
 
     for key_feature in data:
+
+        # ignores this class to avoid perfect classification error
         if key_feature == 'class':
             continue
         (gini_index, threshold) = best_threshold_gini_index(data['class'], data[key_feature], target_attr_categories)
 
+        # updates the best attributes after implementing the gini index, if needed.
         if gini_index < best_attr[2]:
             best_attr = [key_feature, threshold, gini_index]
     
     for tab_count in range(tab_sequence):
         file_obj.write('\t')
 
-    file_obj.write('if feature_rows["' + best_attr[0] + '"] <= ' + str(gini_index) + ':\n')
+    # displays the header of the csv file
+    file_obj.write('if feature_rows["' + best_attr[0][0].upper() + best_attr[0][1:] + '"] <= ' + str(gini_index) + ':\n')
 
     # splits the left data from the current data to act as a node 
     left_data = data_parser_left(data, best_attr[0], best_attr[1])
 
     # recursive call
     decision_tree(left_data, tab_sequence + 1, target_attr_categories, file_obj, depth + 1)
-
 
     for tab_count in range(tab_sequence):
         file_obj.write('\t')
@@ -166,13 +206,9 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth): 
     # recursive call
     decision_tree(right_data, tab_sequence + 1, target_attr_categories, file_obj, depth + 1)
 
-    # for tab_count in range(tab_sequence):
-    #     file_obj.write('\t')
-
-
         
 """
-Writes the program to the training file
+Writes the initial lines of code to the training file
 """
 def program_writer():
     f = open("HW_05_Nafiuzzaman_Raina_Trained.py", "wt") 
@@ -195,7 +231,7 @@ def calculate_accuracy(dataFrame, attribute_name, threshold):
     actual_res_lst = dataFrame["Class"].tolist()
 
     our_res = []
-    # tryes to predict the training dataset based on the best threshold
+    # tries to predict the training dataset based on the best threshold
     for idx, row in dataFrame.iterrows():
         if row[attribute_name] < threshold:
             our_res.append(1)
@@ -218,6 +254,8 @@ def calculate_accuracy(dataFrame, attribute_name, threshold):
 """
 Rounds the data in the data frame and stores it in a dictionary. This makes finding the thresholds
 for each feature easier and reduces possible float errors.
+
+dataFrame: csv file in the dataFrame format
 """
 def round_data(dataFrame):
     age_list = dataFrame["Age"].tolist()
