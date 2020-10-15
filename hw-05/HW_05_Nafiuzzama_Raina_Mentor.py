@@ -157,7 +157,7 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth):
     # -> size of the node [current dataset] < 10
     # -> node [current dataset] > 95% of a specific class
     # -> tree depth of 10
-    if len(data["class"]) < 10 or (attr_1/len(data["class"]) > 0.95 or attr_2/len(data["class"])) > 0.95 or depth == 5:
+    if len(data["class"]) < 10 or (attr_1/len(data["class"]) > 0.95 or attr_2/len(data["class"])) > 0.95 or depth == 2:
         for tab_count in range(tab_sequence):
             file_obj.write('\t')
         out = 1
@@ -303,6 +303,18 @@ def round_data(dataFrame):
         book["earLobes"].append(round(earlobes_list[index]))        # round the EarLobes
 
     return book
+
+def main_writer(f):
+    f.write("    return displayList")
+    f.write("\n\n")
+    f.write(textwrap.dedent('''\
+    def main():
+        lst = csv_parser()
+        for result in lst:
+            print(result)
+    main()
+        '''))
+    
 
 """
 The main function of the program, entry point
