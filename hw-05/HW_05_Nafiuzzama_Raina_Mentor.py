@@ -62,7 +62,7 @@ def best_threshold_gini_index(target_attr_category_data, feature_data, target_at
 
         curr_gini_index_1 = 1 - (c10/(c10+c11))**2 - (c11/(c10+c11))**2
         curr_gini_index_2 = 1 - (c20/(c20+c21))**2 - (c21/(c20+c21))**2
-        curr_gini_index = ((c10+c11)/(c10+c11+c20+c21)) * curr_gini_index_1 + ((c20+c21)/(c10+c11+c20+c21)) * curr_gini_index_2;
+        curr_gini_index = ((c10+c11)/(c10+c11+c20+c21)) * curr_gini_index_1 + ((c20+c21)/(c10+c11+c20+c21)) * curr_gini_index_2
 
         if curr_gini_index < gini_index:
             gini_index = curr_gini_index
@@ -120,7 +120,7 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth): 
     # -> size of the node [current dataset] < 10
     # -> node [current dataset] > 95% of a specific class
     # -> tree depth of 10
-    if len(data["class"]) < 10 or (attr_1/len(data["class"]) > 0.95 or attr_2/len(data["class"])) > 0.95 or depth == 2:
+    if len(data["class"]) < 10 or (attr_1/len(data["class"]) > 0.95 or attr_2/len(data["class"])) > 0.95 or depth == 3:
         for tab_count in range(tab_sequence):
             file_obj.write('\t')
         out = 1
@@ -168,6 +168,7 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth): 
 
     # for tab_count in range(tab_sequence):
     #     file_obj.write('\t')
+    
 
 
         
@@ -175,10 +176,28 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth): 
 Writes the program to the training file
 """
 def program_writer():
-    f = open("HW_05_Nafiuzzaman_Raina_Trained.py", "wt") 
+    f = open("HW_05_Nafiuzzaman_Raina_Trained.py", "w") 
     f.write("import csv \n")
+    book = {
+        "age"       :  0,
+        "ht"        :  1,
+        "tailLn"    :  2,
+        "hairLn"    :  3,
+        "bangLn"    :  4,
+        "reach"     :  5,
+        "earLobes"  :  6
+    }
     f.write(textwrap.dedent('''\
-    def csv_parser(attr_num, threshold):
+    def csv_parser():
+        book = {
+        "age"       :  0,
+        "ht"        :  1,
+        "tailLn"    :  2,
+        "hairLn"    :  3,
+        "bangLn"    :  4,
+        "reach"     :  5,
+        "earLobes"  :  6
+        }
         fileName = input('Please input the file name: ')
         fileReader = csv.reader(open(fileName))
         displayList = list()
@@ -248,13 +267,26 @@ def round_data(dataFrame):
     
     return book
 
+
+def main_writer(f):
+    f.write("    return displayList")
+    f.write("\n")
+    
+    f.write(textwrap.dedent('''\
+    def main():
+        lst = csv_parser()
+        for i in lst:
+            print(i)
+    main()
+    \t'''))
+    
         
 """
 The main function of the program, entry point
 """
 def main():
     # fileName = input("Please type in the Input CSV File (including .csv): ")     # the training file's name
-    fileName = "C:/Users/nikhi/OneDrive/RIT/7th Semester/Principles of Data Mining/Data-Mining/hw-05/Abominable_Data_HW05_v725.csv"
+    fileName = "Abominable_Data_HW05_v725.csv"
     dataFrame_data = make_dataFrame(fileName)                           # dataFrame made from the training file
     tab_sequence = 2
     book = round_data(dataFrame_data)
@@ -262,6 +294,7 @@ def main():
     target_attr_categories = dataFrame_data["Class"].unique().tolist()         # target categories
     file_obj = program_writer()
     decision_tree(book, tab_sequence, target_attr_categories, file_obj, 0)
+    main_writer(file_obj)
 
 
 main()
