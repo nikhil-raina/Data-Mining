@@ -1,13 +1,13 @@
 import csv 
 def csv_parser():
 	book = {
-        "age"       :  0,
-        "ht"        :  1,
-        "tailLn"    :  2,
-        "hairLn"    :  3,
-        "bangLn"    :  4,
-        "reach"     :  5,
-        "earLobes"  :  6
+        "age"       :  [],
+        "ht"        :  [],
+        "tailLn"    :  [],
+        "hairLn"    :  [],
+        "bangLn"    :  [],
+        "reach"     :  [],
+        "earLobes"  :  []
     }
     fileName = input('Please input the file name: ')
     fileReader = csv.reader(open(fileName))
