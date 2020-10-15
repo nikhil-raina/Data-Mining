@@ -267,9 +267,13 @@ def round_data(dataFrame):
     
     return book
 
-
+"""
+This function writes the main function of the training file.
+Input: f: file writer
+Output: None
+"""
 def main_writer(f):
-    f.write("    return displayList")
+    f.write("    return displayList")          
     f.write("\n")
     
     f.write(textwrap.dedent('''\
@@ -280,6 +284,7 @@ def main_writer(f):
     main()
     \t'''))
     
+
         
 """
 The main function of the program, entry point
