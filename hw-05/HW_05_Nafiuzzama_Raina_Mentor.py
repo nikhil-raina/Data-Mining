@@ -146,7 +146,7 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth): 
     for tab_count in range(tab_sequence):
         file_obj.write('\t')
 
-    file_obj.write('if feature_rows[' + best_attr[0] + '] <= ' + str(gini_index) + ':\n')
+    file_obj.write('if feature_rows["' + best_attr[0] + '"] <= ' + str(gini_index) + ':\n')
 
     # splits the left data from the current data to act as a node 
     left_data = data_parser_left(data, best_attr[0], best_attr[1])
