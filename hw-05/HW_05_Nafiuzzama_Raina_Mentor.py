@@ -157,16 +157,14 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth):
     # -> size of the node [current dataset] < 10
     # -> node [current dataset] > 95% of a specific class
     # -> tree depth of 10
-    if len(data["class"]) < 10 or (attr_1/len(data["class"]) > 0.95 or attr_2/len(data["class"])) > 0.95 or depth == 5:
+    if len(data["class"]) < 10 or (attr_1/len(data["class"]) > 0.95 or attr_2/len(data["class"])) > 0.95 or depth == 10:
         for tab_count in range(tab_sequence):
             file_obj.write('    ')
-        print(attr_1, attr_2)
         out = 1
         if attr_1 < attr_2:
             out = -1
         file_obj.write('displayList.append(' + str(out) + ')\n')
         return
-
     # default values set for the best attributes for the following:
     # -> feature index
     # -> threshold
@@ -230,7 +228,7 @@ def program_writer():
         return book
 
     def csv_parser():
-        fileName = input('Please input the file name: ')
+        fileName = "Abominable_Data_HW05_v725.csv"
         dataFrame = pd.read_csv(fileName)
         book = create_dictionary(dataFrame)
         displayList = list()
@@ -243,28 +241,50 @@ def program_writer():
 Calculate the accuracy of the selected attribute's prediction
 Input: DataFrame, Attribute that we want to test the accuracy on, the threshold value
 """
-def calculate_accuracy(dataFrame, attribute_name, threshold):
+def calculate_accuracy(dataFile, resultFile):
+    dataFrame = pd.read_csv(dataFile)
+    # resultFrame = pd.read_csv(resultFile)
+   
     actual_res_lst = dataFrame["Class"].tolist()
+    
 
-    our_res = []
-    # tries to predict the training dataset based on the best threshold
-    for idx, row in dataFrame.iterrows():
-        if row[attribute_name] < threshold:
-            our_res.append(1)
-        else:
-            our_res.append(-1)
+    assam_counter = 0
+    bhuttan_counter = 0
+    
+    right_assam_hit = 0
+    right_bhutan_hit = 0
+    false_assam = 0
+    false_bhutan = 0
 
-    counter  = 0
+    fileReader = open(resultFile, 'r')
+    lines = fileReader.readlines()
+    for i in range(0, len(actual_res_lst)):
+        city = actual_res_lst[i]
+        predicted_city = int(lines[i])
+        if city == "Bhuttan":
+            bhuttan_counter +=1
+        if city == "Assam":
+            assam_counter += 1
+        if predicted_city == 1 and city == "Assam":
+            right_assam_hit +=1
+        elif predicted_city == -1 and city == "Bhuttan":
+            right_bhutan_hit +=1
+        elif predicted_city == 1 and city == "Bhuttan":
+            false_assam +=1
+        elif predicted_city == -1 and city == "Assam":
+            false_bhutan +=1
+            
+    print("Correctly detected Assam: ", right_assam_hit)
+    print("Correctly detect Bhuttan: ", right_bhutan_hit )
+    print("Wrongly detected Assam: ", false_assam)
+    print("Wrongly detected Bhuttan: ", false_bhutan)
 
-    # compares the predicted result with the actual result.
-    for idx in range(0, len(our_res)):
-        if our_res[idx] == actual_res_lst[idx]:
-            counter += 1
+    all_hits = right_assam_hit + right_bhutan_hit
+    all_records = assam_counter + bhuttan_counter
+    calc = all_hits / all_records
+    accuracy_rate = calc * 100
 
-
-    calc = (counter/len(actual_res_lst)) * 100
-    print("The best attribute is:", attribute_name)
-    print("Accuracy of our selected attribute is ", calc)
+    print("Accuracy is ", accuracy_rate)
 
 
 """
@@ -319,17 +339,29 @@ def main_writer(f):
 """
 The main function of the program, entry point
 """
-def main():
-    # fileName = input("Please type in the Input CSV File (including .csv): ")     # the training file's name
-    fileName = "C:/Users/nikhi/OneDrive/RIT/7th Semester/Principles of Data Mining/Data-Mining/hw-05/Abominable_Data_HW05_v725.csv"
-    dataFrame_data = make_dataFrame(fileName)                           # dataFrame made from the training file
-    tab_sequence = 2
-    book = round_data(dataFrame_data)
-    book["class"] = dataFrame_data["Class"].tolist()                       # target attribute list
-    target_attr_categories = dataFrame_data["Class"].unique().tolist()         # target categories
-    file_obj = program_writer()
-    decision_tree(book, tab_sequence, target_attr_categories, file_obj, 0)
-    main_writer(file_obj)
+# def main():
+#     # fileName = input("Please type in the Input CSV File (including .csv): ")     # the training file's name
+#     fileName = "Abominable_Data_HW05_v725.csv"
+#     dataFrame_data = make_dataFrame(fileName)                           # dataFrame made from the training file
+#     tab_sequence = 2
+#     book = round_data(dataFrame_data)
+#     book["class"] = dataFrame_data["Class"].tolist()                       # target attribute list
+#     target_attr_categories = dataFrame_data["Class"].unique().tolist()         # target categories
+#     file_obj = program_writer()
+#     decision_tree(book, tab_sequence, target_attr_categories, file_obj, 0)
+#     main_writer(file_obj)
 
+def acc():
+    for i in range (1, 10):
+        file = "res0" + str(i) + ".txt"
+        print('Current level: ', i)
 
-main()
+        calculate_accuracy("Abominable_Data_HW05_v725.csv", file)
+        print("=================================================")
+
+    print('Current level: ', 10)
+
+    calculate_accuracy("Abominable_Data_HW05_v725.csv", "res10.txt")
+    print("=================================================")
+# main()
+acc()
