@@ -77,9 +77,9 @@ def best_threshold_gini_index(target_attr_category_data, feature_data, target_at
         c20 = greater_than_sum_categories(feature_data, curr_threshold, target_attr_categories[0], target_attr_category_data)
         c21 = greater_than_sum_categories(feature_data, curr_threshold, target_attr_categories[1], target_attr_category_data)
 
-        curr_gini_index_1 = 1 - (c10/(c10+c11))**2 - (c11/(c10+c11))**2
-        curr_gini_index_2 = 1 - (c20/(c20+c21))**2 - (c21/(c20+c21))**2
-        curr_gini_index = ((c10+c11)/(c10+c11+c20+c21)) * curr_gini_index_1 + ((c20+c21)/(c10+c11+c20+c21)) * curr_gini_index_2
+        curr_gini_index_1 = 1 - ((c10/(c10+c11))**2) - ((c11/(c10+c11))**2)
+        curr_gini_index_2 = 1 - ((c20/(c20+c21))**2) - ((c21/(c20+c21))**2)
+        curr_gini_index = (((c10+c11)/(c10+c11+c20+c21)) * curr_gini_index_1) + (((c20+c21)/(c10+c11+c20+c21)) * curr_gini_index_2)
 
         if curr_gini_index < gini_index:
             gini_index = curr_gini_index
@@ -157,9 +157,10 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth):
     # -> size of the node [current dataset] < 10
     # -> node [current dataset] > 95% of a specific class
     # -> tree depth of 10
-    if len(data["class"]) < 10 or (attr_1/len(data["class"]) > 0.95 or attr_2/len(data["class"])) > 0.95 or depth == 4:
+    if len(data["class"]) < 10 or (attr_1/len(data["class"]) > 0.95 or attr_2/len(data["class"])) > 0.95 or depth == 5:
         for tab_count in range(tab_sequence):
             file_obj.write('    ')
+        print(attr_1, attr_2)
         out = 1
         if attr_1 < attr_2:
             out = -1
@@ -187,7 +188,7 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth):
         file_obj.write('    ')
 
     # displays the header of the csv file
-    file_obj.write('if feature_rows["' + best_attr[0][0].upper() + best_attr[0][1:] + '"] <= ' + str(gini_index) + ':\n')
+    file_obj.write('if book["' + best_attr[0] + '"][count] <= ' + str(best_attr[1]) + ':\n')
 
     # splits the left data from the current data to act as a node
     left_data = data_parser_left(data, best_attr[0], best_attr[1])
@@ -213,12 +214,27 @@ Writes the initial lines of code to the training file
 def program_writer():
     f = open("HW_05_Nafiuzzaman_Raina_Trained.py", "wt")
     f.write("import csv \n")
+    f.write("import pandas as pd \n")
     f.write(textwrap.dedent('''\
+    def create_dictionary(dataFrame):
+        book = {
+            "age"       :  dataFrame["Age"].tolist(),
+            "ht"        :  dataFrame["Ht"].tolist(),
+            "tailLn"    :  dataFrame["TailLn"].tolist(),
+            "hairLn"    :  dataFrame["HairLn"].tolist(),
+            "bangLn"    :  dataFrame["BangLn"].tolist(),
+            "reach"     :  dataFrame["Reach"].tolist(),
+            "earLobes"  :  dataFrame["EarLobes"].tolist()
+        }
+
+        return book
+
     def csv_parser():
         fileName = input('Please input the file name: ')
-        fileReader = csv.reader(open(fileName))
+        dataFrame = pd.read_csv(fileName)
+        book = create_dictionary(dataFrame)
         displayList = list()
-        for feature_rows in fileReader:
+        for count in range(len(book["age"])):
         '''))
     return f
 
@@ -286,6 +302,8 @@ def round_data(dataFrame):
 
     return book
 
+"""
+"""
 def main_writer(f):
     f.write("    return displayList")
     f.write("\n\n")
