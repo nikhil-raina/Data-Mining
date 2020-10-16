@@ -1,5 +1,5 @@
 """
-Filename: HW05_Nafiuzzaman_Raina_Trained.py
+Filename: HW05_Nafiuzzaman_Raina_Mentor.py
 Name: Navid Nafiuzzaman <mxn4459@cs.rit.edu>
       Nikhil Raina       <nxr5013@cs.rit.edu>
 Description: This file builds a classifier by choosing the best attribute
@@ -210,7 +210,7 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth):
 Writes the initial lines of code to the training file
 """
 def program_writer():
-    f = open("HW_05_Nafiuzzaman_Raina_Trained.py", "wt")
+    f = open("HW05_Classifier_Nafiuzzaman_Raina.py", "wt")
     f.write("import csv \n")
     f.write("import pandas as pd \n")
     f.write(textwrap.dedent('''\
@@ -228,7 +228,7 @@ def program_writer():
         return book
 
     def csv_parser():
-        fileName = "Abominable_Data_HW05_v725.csv"
+        fileName = input('Please input the file name: ')
         dataFrame = pd.read_csv(fileName)
         book = create_dictionary(dataFrame)
         displayList = list()
@@ -248,17 +248,17 @@ def calculate_accuracy(dataFile, resultFile):
     actual_res_lst = dataFrame["Class"].tolist()
     
 
-    assam_counter = 0
-    bhuttan_counter = 0
+    assam_counter = 0                   # total assam
+    bhuttan_counter = 0                 # total bhuttan in dataset
     
-    right_assam_hit = 0
+    right_assam_hit = 0                 # confusion matrix 
     right_bhutan_hit = 0
     false_assam = 0
     false_bhutan = 0
 
     fileReader = open(resultFile, 'r')
     lines = fileReader.readlines()
-    for i in range(0, len(actual_res_lst)):
+    for i in range(0, len(actual_res_lst)):     # compare with our result file
         city = actual_res_lst[i]
         predicted_city = int(lines[i])
         if city == "Bhuttan":
@@ -281,8 +281,8 @@ def calculate_accuracy(dataFile, resultFile):
 
     all_hits = right_assam_hit + right_bhutan_hit
     all_records = assam_counter + bhuttan_counter
-    calc = all_hits / all_records
-    accuracy_rate = calc * 100
+    calc = all_hits / all_records                   # calculates the accuracy of our decision tree
+    accuracy_rate = calc * 100              
 
     print("Accuracy is ", accuracy_rate)
 
@@ -323,6 +323,7 @@ def round_data(dataFrame):
     return book
 
 """
+This function writes the main method of the training file.
 """
 def main_writer(f):
     f.write("    return displayList")
@@ -335,33 +336,35 @@ def main_writer(f):
     main()
         '''))
     
-
 """
-The main function of the program, entry point
+This function calculates accuracy. 
 """
-# def main():
-#     # fileName = input("Please type in the Input CSV File (including .csv): ")     # the training file's name
-#     fileName = "Abominable_Data_HW05_v725.csv"
-#     dataFrame_data = make_dataFrame(fileName)                           # dataFrame made from the training file
-#     tab_sequence = 2
-#     book = round_data(dataFrame_data)
-#     book["class"] = dataFrame_data["Class"].tolist()                       # target attribute list
-#     target_attr_categories = dataFrame_data["Class"].unique().tolist()         # target categories
-#     file_obj = program_writer()
-#     decision_tree(book, tab_sequence, target_attr_categories, file_obj, 0)
-#     main_writer(file_obj)
-
-def acc():
+def accuracy_counter():
     for i in range (1, 10):
-        file = "res0" + str(i) + ".txt"
-        print('Current level: ', i)
+        file = "res0" + str(i) + ".txt"         # we pipe out the result of training file ">res01.txt"
+        print('Current level: ', i)             # where res<levelNumber>.txt
 
         calculate_accuracy("Abominable_Data_HW05_v725.csv", file)
         print("=================================================")
 
     print('Current level: ', 10)
-
     calculate_accuracy("Abominable_Data_HW05_v725.csv", "res10.txt")
     print("=================================================")
-# main()
-acc()
+
+"""
+The main function of the program, entry point
+"""
+def main():
+    # fileName = input("Please type in the Input CSV File (including .csv): ")     # the training file's name
+    fileName = "Abominable_Data_HW05_v725.csv"
+    dataFrame_data = make_dataFrame(fileName)                           # dataFrame made from the training file
+    tab_sequence = 2
+    book = round_data(dataFrame_data)
+    book["class"] = dataFrame_data["Class"].tolist()                       # target attribute list
+    target_attr_categories = dataFrame_data["Class"].unique().tolist()         # target categories
+    file_obj = program_writer()
+    decision_tree(book, tab_sequence, target_attr_categories, file_obj, 0)
+    main_writer(file_obj)
+
+
+main()
