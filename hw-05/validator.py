@@ -16,6 +16,14 @@ def n_cross_divide(n, data):
 
 if __name__ == "__main__":
     fileName = 'C:/Users/nikhi/OneDrive/RIT/7th Semester/Principles of Data Mining/Data-Mining/hw-05/Abominable_Data_HW05_v725.csv'
-    li = n_cross_divide(10, fileName)
-    print(li)
-    pass
+    n = 10
+    cluster_dataset = n_cross_divide(n, fileName)
+    cluster_index = 0
+    row_index = 1
+    for matrix_row in cluster_dataset:
+        print('Cluster Number:', cluster_index)
+        for dataset_row in matrix_row:
+            print('Row Number:', row_index, ':>>>', dataset_row)
+            row_index += 1
+        row_index = 1
+        cluster_index += 1
