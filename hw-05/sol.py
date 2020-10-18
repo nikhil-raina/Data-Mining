@@ -158,7 +158,7 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth):
     # -> size of the node [current dataset] < 10
     # -> node [current dataset] > 95% of a specific class
     # -> tree depth of 10
-    if len(data["class"]) < 10 or (attr_1/len(data["class"]) > 0.95 or attr_2/len(data["class"])) > 0.95 or depth == 10:
+    if len(data["class"]) < 10 or (attr_1/len(data["class"]) > 0.95 or attr_2/len(data["class"])) > 0.95 or depth == 10:    # depth var , #0.95 == purity, # data-record (b)
         for tab_count in range(tab_sequence):
             file_obj.write('    ')
         out = 1
@@ -431,7 +431,6 @@ def makee_split_df(lst):
 Outputs a TMP CSV file consisting of 9 dataframes    
 """
 def make_csv(df_lst):
-    merge_df = pd.concat(df_lst)
     merge_df.to_csv("tmp.csv", index=False)         # dump rest of the dataframe to tst.csv
     return 1
     # for i in range(0, len(df_lst)):
@@ -442,18 +441,21 @@ def make_csv(df_lst):
 def k_fold(df_lst):
     test_dataframeLst = []
     for idx in range(0, len(df_lst)):
-        train_dataFrame = df_lst[idx]               # we will use that for training
-        test_dataframeLst = df_lst[:idx] + df_lst[idx+1 : ]     # our test 9 dataframes
+        
+        test_dataframeLst = df_lst[idx]                             # dataFrame for testing            (1)  
+        train_dataFrame_lst = df_lst[:idx] + df_lst[idx+1 : ]       # training data frames lst 
+        train_dataFrame = pd.concat(train_dataFrame_lst)            # make it into a big train dataset (9)
 
         ######################################################################################
         ## THIS FOLLOWING BLOCK OF CODE IS FOR MAKE DECISION TREE WITH OUR SELECTED DATAFRAME
-        # book = round_data(train_dataFrame)
-        # book["class"] = train_dataFrame["Class"].tolist()
-        # target_attr_categories = train_dataFrame["Class"].unique().tolist()
-        # file_obj = program_writer()
-        # tab_sequence = 2
-        # decision_tree(book, tab_sequence, target_attr_categories, file_obj, 0)      # generate the tree
-        # main_writer(file_obj)
+        book = round_data(train_dataFrame)
+        book["class"] = train_dataFrame["Class"].tolist()
+        target_attr_categories = train_dataFrame["Class"].unique().tolist()
+        file_obj = program_writer()
+        tab_sequence = 2
+
+        decision_tree(book, tab_sequence, target_attr_categories, file_obj, 0)      # generate the tree
+        main_writer(file_obj)
 
         ####################################################################################
 
