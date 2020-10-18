@@ -292,9 +292,3 @@ def csv_parser():
                         displayList.append(-1)
     return displayList
 
-def runner():
-    f = open("res.txt", "w")
-    lst = csv_parser()
-    for result in lst:
-        
-        

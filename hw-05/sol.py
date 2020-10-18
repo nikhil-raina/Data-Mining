@@ -8,7 +8,7 @@ based on the cost.
 import pandas as pd
 import numpy as np
 import textwrap
-from ab import main as
+from ab import csv_parser as pr
 
 """
 Build a pandas dataframe for the input CSV file
@@ -389,11 +389,11 @@ def calculate_accuracy(dataFile, resultFile):
     false_assam = 0
     false_bhutan = 0
 
-    fileReader = open(resultFile, 'r')
-    lines = fileReader.readlines()
+    # fileReader = open(resultFile, 'r')
+    lines = resultFile                          # updated form HW05, its just comparing a list now
     for i in range(0, len(actual_res_lst)):     # compare with our result file
         city = actual_res_lst[i]
-        predicted_city = int(lines[i])
+        predicted_city = lines[i]
         if city == "Bhuttan":
             bhuttan_counter +=1
         if city == "Assam":
@@ -427,7 +427,9 @@ def makee_split_df(lst):
         dataFrame_lst.append(df)
     return dataFrame_lst
 
-
+"""
+Outputs a TMP CSV file consisting of 9 dataframes    
+"""
 def make_csv(df_lst):
     merge_df = pd.concat(df_lst)
     merge_df.to_csv("tmp.csv", index=False)         # dump rest of the dataframe to tst.csv
@@ -440,9 +442,11 @@ def make_csv(df_lst):
 def k_fold(df_lst):
     test_dataframeLst = []
     for idx in range(0, len(df_lst)):
-        train_dataFrame = df_lst[idx]
-        test_dataframeLst = df_lst[:idx] + df_lst[idx+1 : ]
-       
+        train_dataFrame = df_lst[idx]               # we will use that for training
+        test_dataframeLst = df_lst[:idx] + df_lst[idx+1 : ]     # our test 9 dataframes
+
+        ######################################################################################
+        ## THIS FOLLOWING BLOCK OF CODE IS FOR MAKE DECISION TREE WITH OUR SELECTED DATAFRAME
         # book = round_data(train_dataFrame)
         # book["class"] = train_dataFrame["Class"].tolist()
         # target_attr_categories = train_dataFrame["Class"].unique().tolist()
@@ -450,8 +454,13 @@ def k_fold(df_lst):
         # tab_sequence = 2
         # decision_tree(book, tab_sequence, target_attr_categories, file_obj, 0)      # generate the tree
         # main_writer(file_obj)
+
+        ####################################################################################
+
         make_csv(test_dataframeLst)
-        
+        resultLst = pr()
+        # print(len(resultLst))
+        calculate_accuracy("tmp.csv", resultLst)
 
         
         break
