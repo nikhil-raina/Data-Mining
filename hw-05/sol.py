@@ -9,6 +9,7 @@ import pandas as pd
 import numpy as np
 import textwrap
 from ab import csv_parser as pr
+import time
 
 """
 Build a pandas dataframe for the input CSV file
@@ -150,7 +151,7 @@ target_attr_categories: [Assam, Bhuttan]
 file_obj: file obj where the data will be written to
 depth: recursive depth
 """
-def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth):
+def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth, purity, depth_level, data_records):
     attr_1 = attr_sum(data["class"], target_attr_categories[0])     # total number of values matching attr 1 in the dataset
     attr_2 = len(data["class"]) - attr_1                            # total number of values matching attr 2 in the dataset
 
@@ -158,7 +159,7 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth):
     # -> size of the node [current dataset] < 10
     # -> node [current dataset] > 95% of a specific class
     # -> tree depth of 10
-    if len(data["class"]) < 10 or (attr_1/len(data["class"]) > 0.95 or attr_2/len(data["class"])) > 0.95 or depth == 10:    # depth var , #0.95 == purity, # data-record (b)
+    if len(data["class"]) < data_records or (attr_1/len(data["class"]) > purity or attr_2/len(data["class"])) > purity or depth == depth_level:    # depth var , #0.95 == purity, # data-record (b)
         for tab_count in range(tab_sequence):
             file_obj.write('    ')
         out = 1
@@ -193,7 +194,7 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth):
     left_data = data_parser_left(data, best_attr[0], best_attr[1])
 
     # recursive call
-    decision_tree(left_data, tab_sequence + 1, target_attr_categories, file_obj, depth + 1)
+    decision_tree(left_data, tab_sequence + 1, target_attr_categories, file_obj, depth + 1, purity, depth_level, data_records)
 
     for tab_count in range(tab_sequence):
         file_obj.write('    ')
@@ -204,7 +205,7 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth):
     right_data = data_parser_right(data, best_attr[0], best_attr[1])
 
     # recursive call
-    decision_tree(right_data, tab_sequence + 1, target_attr_categories, file_obj, depth + 1)
+    decision_tree(right_data, tab_sequence + 1, target_attr_categories, file_obj, depth + 1, purity, depth_level, data_records)
 
 
 """
@@ -281,6 +282,7 @@ def calculate_accuracy(dataFile, resultFile):
     print("Wrongly detected Bhuttan: ", false_bhutan)
 
     all_hits = right_assam_hit + right_bhutan_hit
+    all_misses = false_assam + false_bhutan
     all_records = assam_counter + bhuttan_counter
     calc = all_hits / all_records                   # calculates the accuracy of our decision tree
     accuracy_rate = calc * 100              
@@ -407,17 +409,20 @@ def calculate_accuracy(dataFile, resultFile):
         elif predicted_city == -1 and city == "Assam":
             false_bhutan +=1
             
-    print("Correctly detected Assam: ", right_assam_hit)
-    print("Correctly detect Bhuttan: ", right_bhutan_hit )
-    print("Wrongly detected Assam: ", false_assam)
-    print("Wrongly detected Bhuttan: ", false_bhutan)
+    # print("Correctly detected Assam: ", right_assam_hit)
+    # print("Correctly detect Bhuttan: ", right_bhutan_hit )
+    # print("Wrongly detected Assam: ", false_assam)
+    # print("Wrongly detected Bhuttan: ", false_bhutan)
 
     all_hits = right_assam_hit + right_bhutan_hit
+    all_misses = false_assam + false_bhutan
     all_records = assam_counter + bhuttan_counter
     calc = all_hits / all_records                   # calculates the accuracy of our decision tree
     accuracy_rate = calc * 100              
 
-    print("Accuracy is ", accuracy_rate)
+    
+    # print("Accuracy is ", accuracy_rate)
+    return (accuracy_rate, all_hits, all_misses, all_records)
 
 def makee_split_df(lst):
     headerCol = ["Age","Ht","TailLn","HairLn","BangLn","Reach","EarLobes","Class"]
@@ -431,41 +436,55 @@ def makee_split_df(lst):
 Outputs a TMP CSV file consisting of 9 dataframes    
 """
 def make_csv(df_lst):
-    merge_df.to_csv("tmp.csv", index=False)         # dump rest of the dataframe to tst.csv
+    df_lst.to_csv("tmp.csv", index=False)         # dump rest of the dataframe to tst.csv
     return 1
     # for i in range(0, len(df_lst)):
     #     selected_df = df_lst[i]
     #     selected_df.to_csv("out.csv", index=False)
     #     break
 
+def csvWriter(st):
+    file = open("data.csv", "a")
+    file.write(st)
+    file.close()
+
 def k_fold(df_lst):
-    test_dataframeLst = []
+    
+    purity_lst = [70, 75, 80, 85, 90, 95, 96, 98]
+    data_record_lst = [30, 25, 20, 15, 10, 8, 6, 5, 4, 3, 2]
+    depth_level_lst = [2, 3, 4, 5, 6, 7, 8, 9, 10]
+
     for idx in range(0, len(df_lst)):
-        
-        test_dataframeLst = df_lst[idx]                             # dataFrame for testing            (1)  
+        test_dataframe = df_lst[idx]                             # dataFrame for testing            (1)  
         train_dataFrame_lst = df_lst[:idx] + df_lst[idx+1 : ]       # training data frames lst 
         train_dataFrame = pd.concat(train_dataFrame_lst)            # make it into a big train dataset (9)
 
         ######################################################################################
         ## THIS FOLLOWING BLOCK OF CODE IS FOR MAKE DECISION TREE WITH OUR SELECTED DATAFRAME
         book = round_data(train_dataFrame)
-        book["class"] = train_dataFrame["Class"].tolist()
-        target_attr_categories = train_dataFrame["Class"].unique().tolist()
-        file_obj = program_writer()
-        tab_sequence = 2
-
-        decision_tree(book, tab_sequence, target_attr_categories, file_obj, 0)      # generate the tree
-        main_writer(file_obj)
-
-        ####################################################################################
-
-        make_csv(test_dataframeLst)
-        resultLst = pr()
-        # print(len(resultLst))
-        calculate_accuracy("tmp.csv", resultLst)
-
         
-        break
+        for prt in purity_lst:
+            for dataRec in data_record_lst:
+                for depth in depth_level_lst:
+                    book["class"] = train_dataFrame["Class"].tolist()
+                    target_attr_categories = train_dataFrame["Class"].unique().tolist()
+                    file_obj = program_writer()
+                    tab_sequence = 2
+
+                    decision_tree(book, tab_sequence, target_attr_categories, file_obj, 0, prt, depth, dataRec)      # generate the tree
+                    # time.sleep(1)
+                    main_writer(file_obj)
+
+                    ####################################################################################
+
+                    make_csv(test_dataframe)
+                    resultLst = pr()
+                    # print(len(resultLst))
+                    statis = calculate_accuracy("tmp.csv", resultLst)
+                    print(statis)
+                    csvStr = str(prt) + "," + str(dataRec) + "," + str(depth) + "," + str(statis[0])  + "," + str(statis[1]) + "," + str(statis[2]) + "," + str(statis[3]) + "\n"
+                    csvWriter(csvStr) 
+                    
         
         
 
