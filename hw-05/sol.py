@@ -150,7 +150,7 @@ target_attr_categories: [Assam, Bhuttan]
 file_obj: file obj where the data will be written to
 depth: recursive depth
 """
-def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth, purity, depth_level, data_records):
+def decision_tree_recursive(data, tab_sequence, target_attr_categories, file_obj, depth, purity, depth_level, data_records):
     attr_1 = attr_sum(data["class"], target_attr_categories[0])     # total number of values matching attr 1 in the dataset
     attr_2 = len(data["class"]) - attr_1                            # total number of values matching attr 2 in the dataset
 
@@ -166,6 +166,7 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth, p
             out = -1
         file_obj.write('displayList.append(' + str(out) + ')\n')
         return
+
     # default values set for the best attributes for the following:
     # -> feature index
     # -> threshold
@@ -193,7 +194,7 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth, p
     left_data = data_parser_left(data, best_attr[0], best_attr[1])
 
     # recursive call
-    decision_tree(left_data, tab_sequence + 1, target_attr_categories, file_obj, depth + 1, purity, depth_level, data_records)
+    decision_tree_recursive(left_data, tab_sequence + 1, target_attr_categories, file_obj, depth + 1 if depth_level > -1 else 0, purity, depth_level, data_records)
 
     for tab_count in range(tab_sequence):
         file_obj.write('    ')
@@ -204,14 +205,24 @@ def decision_tree(data, tab_sequence, target_attr_categories, file_obj, depth, p
     right_data = data_parser_right(data, best_attr[0], best_attr[1])
 
     # recursive call
-    decision_tree(right_data, tab_sequence + 1, target_attr_categories, file_obj, depth + 1, purity, depth_level, data_records)
+    decision_tree_recursive(right_data, tab_sequence + 1, target_attr_categories, file_obj, depth + 1 if depth_level > -1 else 0, purity, depth_level, data_records)
+
+
+"""
+Initial function call to allow the writing of the return of the
+displayList on to the current file_obj and closes the file. 
+"""
+def decision_tree_start(data, tab_sequence, target_attr_categories, file_obj, depth, purity, depth_level, data_records):
+    decision_tree_recursive(data, tab_sequence, target_attr_categories, file_obj, depth, purity, depth_level, data_records)      # generate the tree
+    file_obj.write("    return displayList\n")
+    file_obj.close()
 
 
 """
 Writes the initial lines of code to the training file
 """
 def program_writer():
-    f = open("ab.py", "wt")
+    f = open("hw-05/trained_file.py", "wt")
     f.write("import csv \n")
     f.write("import pandas as pd \n")
     f.write(textwrap.dedent('''\
@@ -229,64 +240,13 @@ def program_writer():
         return book
 
     def csv_parser():
-        fileName = "tmp.csv"
+        fileName = "hw-05/testing_file.csv"
         dataFrame = pd.read_csv(fileName)
         book = create_dictionary(dataFrame)
         displayList = list()
         for count in range(len(book["age"])):
         '''))
     return f
-
-
-"""
-Calculate the accuracy of the selected attribute's prediction
-Input: DataFrame, Attribute that we want to test the accuracy on, the threshold value
-"""
-def calculate_accuracy(dataFile, resultFile):
-    dataFrame = pd.read_csv(dataFile)
-    # resultFrame = pd.read_csv(resultFile)
-   
-    actual_res_lst = dataFrame["Class"].tolist()
-    
-
-    assam_counter = 0                   # total assam
-    bhuttan_counter = 0                 # total bhuttan in dataset
-    
-    right_assam_hit = 0                 # confusion matrix 
-    right_bhutan_hit = 0
-    false_assam = 0
-    false_bhutan = 0
-
-    fileReader = open(resultFile, 'r')
-    lines = fileReader.readlines()
-    for i in range(0, len(actual_res_lst)):     # compare with our result file
-        city = actual_res_lst[i]
-        predicted_city = int(lines[i])
-        if city == "Bhuttan":
-            bhuttan_counter +=1
-        if city == "Assam":
-            assam_counter += 1
-        if predicted_city == 1 and city == "Assam":
-            right_assam_hit +=1
-        elif predicted_city == -1 and city == "Bhuttan":
-            right_bhutan_hit +=1
-        elif predicted_city == 1 and city == "Bhuttan":
-            false_assam +=1
-        elif predicted_city == -1 and city == "Assam":
-            false_bhutan +=1
-            
-    print("Correctly detected Assam: ", right_assam_hit)
-    print("Correctly detect Bhuttan: ", right_bhutan_hit )
-    print("Wrongly detected Assam: ", false_assam)
-    print("Wrongly detected Bhuttan: ", false_bhutan)
-
-    all_hits = right_assam_hit + right_bhutan_hit
-    all_misses = false_assam + false_bhutan
-    all_records = assam_counter + bhuttan_counter
-    calc = all_hits / all_records                   # calculates the accuracy of our decision tree
-    accuracy_rate = calc * 100              
-
-    print("Accuracy is ", accuracy_rate)
 
 
 """
@@ -324,34 +284,6 @@ def round_data(dataFrame):
 
     return book
 
-"""
-This function writes the main method of the training file.
-"""
-def main_writer(f):
-    f.write("    return displayList")
-    # f.write("\n\n")
-    # f.write(textwrap.dedent('''\
-    # def main():
-    #     lst = csv_parser()
-    #     for result in lst:
-    #         print(result)
-    # main()
-    #     '''))
-    
-"""
-This function calculates accuracy. 
-"""
-# def accuracy_counter():
-#     for i in range (1, 10):
-#         file = "res0" + str(i) + ".txt"         # we pipe out the result of training file ">res01.txt"
-#         print('Current level: ', i)             # where res<levelNumber>.txt
-
-#         calculate_accuracy("Abominable_Data_HW05_v725.csv", file)
-#         print("=================================================")
-
-#     print('Current level: ', 10)
-#     calculate_accuracy("Abominable_Data_HW05_v725.csv", "res10.txt")
-#     print("=================================================")
 
 """
 The main function of the program, entry point
@@ -365,11 +297,8 @@ def main():
     book["class"] = dataFrame_data["Class"].tolist()                       # target attribute list
     target_attr_categories = dataFrame_data["Class"].unique().tolist()         # target categories
     file_obj = program_writer()
-    decision_tree(book, tab_sequence, target_attr_categories, file_obj, 0)
-    main_writer(file_obj)
+    decision_tree_start(book, tab_sequence, target_attr_categories, file_obj, 0)
 
-
-# main()
 
 """
 Calculate the accuracy of the selected attribute's prediction
@@ -377,10 +306,7 @@ Input: DataFrame, Attribute that we want to test the accuracy on, the threshold 
 """
 def calculate_accuracy(dataFile, resultFile):
     dataFrame = pd.read_csv(dataFile)
-    # resultFrame = pd.read_csv(resultFile)
-   
     actual_res_lst = dataFrame["Class"].tolist()
-    
 
     assam_counter = 0                   # total assam
     bhuttan_counter = 0                 # total bhuttan in dataset
@@ -390,7 +316,6 @@ def calculate_accuracy(dataFile, resultFile):
     false_assam = 0
     false_bhutan = 0
 
-    # fileReader = open(resultFile, 'r')
     lines = resultFile                          # updated form HW05, its just comparing a list now
     for i in range(0, len(actual_res_lst)):     # compare with our result file
         city = actual_res_lst[i]
@@ -407,11 +332,6 @@ def calculate_accuracy(dataFile, resultFile):
             false_assam +=1
         elif predicted_city == -1 and city == "Assam":
             false_bhutan +=1
-            
-    # print("Correctly detected Assam: ", right_assam_hit)
-    # print("Correctly detect Bhuttan: ", right_bhutan_hit )
-    # print("Wrongly detected Assam: ", false_assam)
-    # print("Wrongly detected Bhuttan: ", false_bhutan)
 
     all_hits = right_assam_hit + right_bhutan_hit
     all_misses = false_assam + false_bhutan
@@ -419,8 +339,6 @@ def calculate_accuracy(dataFile, resultFile):
     calc = all_hits / all_records                   # calculates the accuracy of our decision tree
     accuracy_rate = calc * 100              
 
-    
-    # print("Accuracy is ", accuracy_rate)
     return (accuracy_rate, all_hits, all_misses, all_records)
 
 def makee_split_df(lst):
@@ -435,23 +353,33 @@ def makee_split_df(lst):
 Outputs a TMP CSV file consisting of 9 dataframes    
 """
 def make_csv(df_lst):
-    df_lst.to_csv("tmp.csv", index=False)         # dump rest of the dataframe to tst.csv
+    df_lst.to_csv("hw-05/testing_file.csv", index=False)         # dump rest of the dataframe to tst.csv
     return 1
     # for i in range(0, len(df_lst)):
     #     selected_df = df_lst[i]
     #     selected_df.to_csv("out.csv", index=False)
     #     break
 
+
+"""
+Function stores the results of the current N Fold Cross Validation sequence
+"""
 def csvWriter(st):
-    file = open("data.csv", "a")
+    file = open("hw-05/output_results_file", "a")
     file.write(st)
     file.close()
 
-def k_fold(df_lst):
-    
-    purity_lst = [70, 75, 80, 85, 90, 95, 96, 98]
+
+"""
+Implements the N Fold Cross Validation algorithm for the dataset its been given
+"""
+def n_fold_algorithm(df_lst):
+    purity_lst = [0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 0.96, 0.98]
     data_record_lst = [30, 25, 20, 15, 10, 8, 6, 5, 4, 3, 2]
     depth_level_lst = [2, 3, 4, 5, 6, 7, 8, 9, 10]
+    constant_data_records = 10      # constant data record number as mentioned in the document
+    constant_purity = 0.95          # constant purity number as mentioned in the document
+    constant_depth = -1             # -1 indicates that the value shouldn't be used while for the algorithm
 
     for idx in range(0, len(df_lst)):
         test_dataframe = df_lst[idx]                             # dataFrame for testing            (1)  
@@ -462,43 +390,75 @@ def k_fold(df_lst):
         ## THIS FOLLOWING BLOCK OF CODE IS FOR MAKE DECISION TREE WITH OUR SELECTED DATAFRAME
         book = round_data(train_dataFrame)
         
+        print('Test block: ',idx,' for depth')
+        for depth in depth_level_lst:
+            print('depth at:', depth)
+            book["class"] = train_dataFrame["Class"].tolist()
+            target_attr_categories = train_dataFrame["Class"].unique().tolist()
+            file_obj = program_writer()
+            tab_sequence = 2
+
+            decision_tree_start(book, tab_sequence, target_attr_categories, file_obj, 0, constant_purity, depth, constant_data_records)      # generate the tree
+            ####################################################################################
+
+            make_csv(test_dataframe)
+            trained_file = __import__("trained_file")
+            resultLst = trained_file.csv_parser()
+            statis = calculate_accuracy("hw-05/testing_file.csv", resultLst)
+            csvStr = "DEPTH (" + str(depth) + ") => Accuracy Rate :>>> " + str(statis[0]) + ", All Hits :>>> " + str(statis[1]) + ", All Misses :>>> " + str(statis[2]) + ", All Records :>>> " + str(statis[3])
+            csvWriter(csvStr + "\n")
+        
+        print('Test block: ',idx,' for data record')
+        for dataRec in data_record_lst:
+            print('data record at:', dataRec)
+            book["class"] = train_dataFrame["Class"].tolist()
+            target_attr_categories = train_dataFrame["Class"].unique().tolist()
+            file_obj = program_writer()
+            tab_sequence = 2
+
+            decision_tree_start(book, tab_sequence, target_attr_categories, file_obj, 0, constant_purity, constant_depth, dataRec)      # generate the tree
+            ####################################################################################
+
+            make_csv(test_dataframe)
+            trained_file = __import__("trained_file")
+            resultLst = trained_file.csv_parser()
+            statis = calculate_accuracy("hw-05/testing_file.csv", resultLst)
+            csvStr = "DATA RECORD (" + str(dataRec) + ") => Accuracy Rate :>>> " + str(statis[0]) + ", All Hits :>>> " + str(statis[1]) + ", All Misses :>>> " + str(statis[2]) + ", All Records :>>> " + str(statis[3])
+            csvWriter(csvStr + "\n")
+        
+        print('Test block: ',idx,' for purity')
         for prt in purity_lst:
-            for dataRec in data_record_lst:
-                for depth in depth_level_lst:
-                    book["class"] = train_dataFrame["Class"].tolist()
-                    target_attr_categories = train_dataFrame["Class"].unique().tolist()
-                    file_obj = program_writer()
-                    tab_sequence = 2
+            print('purity at:', prt)
+            book["class"] = train_dataFrame["Class"].tolist()
+            target_attr_categories = train_dataFrame["Class"].unique().tolist()
+            file_obj = program_writer()
+            tab_sequence = 2
 
-                    decision_tree(book, tab_sequence, target_attr_categories, file_obj, 0, prt, depth, dataRec)      # generate the tree
-                    # time.sleep(1)
-                    main_writer(file_obj)
+            decision_tree_start(book, tab_sequence, target_attr_categories, file_obj, 0, prt, constant_depth, dataRec)      # generate the tree
+            ####################################################################################
 
-                    ####################################################################################
+            make_csv(test_dataframe)
+            trained_file = __import__("trained_file")
+            resultLst = trained_file.csv_parser()
+            statis = calculate_accuracy("hw-05/testing_file.csv", resultLst)
+            csvStr = "PURITY (" + str(prt) + ") => Accuracy Rate :>>> " + str(statis[0]) + ", All Hits :>>> " + str(statis[1]) + ", All Misses :>>> " + str(statis[2]) + ", All Records :>>> " + str(statis[3])
+            csvWriter(csvStr + "\n")
 
-                    make_csv(test_dataframe)
-                    resultLst = pr()
-                    # print(len(resultLst))
-                    statis = calculate_accuracy("tmp.csv", resultLst)
-                    print(statis)
-                    csvStr = str(prt) + "," + str(dataRec) + "," + str(depth) + "," + str(statis[0])  + "," + str(statis[1]) + "," + str(statis[2]) + "," + str(statis[3]) + "\n"
-                    csvWriter(csvStr) 
-                    
-        
-        
-
-def figure_out():
-    fileName = "Abominable_Data_HW05_v725.csv"
+     
+"""
+Function call for implementing the N Cross Validation concept on the data
+"""
+def n_fold_cross_validation(fileName, cluster_divisions):
     large_dataFrame = make_dataFrame(fileName)    
     large_array = large_dataFrame.to_numpy()
-    splitted = np.split(large_array, 10)
+    splitted = np.split(large_array, cluster_divisions)
 
-    dataFrameLst = makee_split_df(splitted)         # contains the 10 dataframe as a lst after split
-    k_fold(dataFrameLst)
-
-
+    dataFrameLst = makee_split_df(splitted)         # contains the number of dataframes as per cluster_division
+    n_fold_algorithm(dataFrameLst)
 
 
-
-
-figure_out()
+if __name__ == "__main__":
+    fileName = "C:/Users/nikhi/OneDrive/RIT/7th Semester/Principles of Data Mining/Data-Mining/hw-05/Abominable_Data_HW05_v725.csv"
+    # fileName = "Abominable_Data_HW05_v725.csv"
+    n_fold_cross_validation(fileName, 10)
+    # main()
