@@ -365,7 +365,7 @@ def make_csv(df_lst):
 Function stores the results of the current N Fold Cross Validation sequence
 """
 def csvWriter(st):
-    file = open("hw-05/output_results_file", "a")
+    file = open("hw-05/output_results_file.csv", "a")
     file.write(st)
     file.close()
 
@@ -405,8 +405,8 @@ def n_fold_algorithm(df_lst):
             trained_file = __import__("trained_file")
             resultLst = trained_file.csv_parser()
             statis = calculate_accuracy("hw-05/testing_file.csv", resultLst)
-            csvStr = "DEPTH (" + str(depth) + ") => Accuracy Rate :>>> " + str(statis[0]) + ", All Hits :>>> " + str(statis[1]) + ", All Misses :>>> " + str(statis[2]) + ", All Records :>>> " + str(statis[3])
-            csvWriter(csvStr + "\n")
+            csvStr = str(constant_purity)+ "," + str(constant_data_records) + "," + str(depth) + "," + str(statis[0])  + "," + str(statis[1]) + "," + str(statis[2]) + "," + str(statis[3]) +"\n"
+            csvWriter(csvStr)
         
         print('Test block: ',idx,' for data record')
         for dataRec in data_record_lst:
@@ -423,8 +423,8 @@ def n_fold_algorithm(df_lst):
             trained_file = __import__("trained_file")
             resultLst = trained_file.csv_parser()
             statis = calculate_accuracy("hw-05/testing_file.csv", resultLst)
-            csvStr = "DATA RECORD (" + str(dataRec) + ") => Accuracy Rate :>>> " + str(statis[0]) + ", All Hits :>>> " + str(statis[1]) + ", All Misses :>>> " + str(statis[2]) + ", All Records :>>> " + str(statis[3])
-            csvWriter(csvStr + "\n")
+            csvStr = str(constant_purity)+ "," + str(dataRec) + "," + str(constant_depth) + "," + str(statis[0])  + "," + str(statis[1]) + "," + str(statis[2]) + "," + str(statis[3]) +"\n"
+            csvWriter(csvStr)
         
         print('Test block: ',idx,' for purity')
         for prt in purity_lst:
@@ -434,15 +434,15 @@ def n_fold_algorithm(df_lst):
             file_obj = program_writer()
             tab_sequence = 2
 
-            decision_tree_start(book, tab_sequence, target_attr_categories, file_obj, 0, prt, constant_depth, dataRec)      # generate the tree
+            decision_tree_start(book, tab_sequence, target_attr_categories, file_obj, 0, prt, constant_depth, constant_data_records)      # generate the tree
             ####################################################################################
 
             make_csv(test_dataframe)
             trained_file = __import__("trained_file")
             resultLst = trained_file.csv_parser()
             statis = calculate_accuracy("hw-05/testing_file.csv", resultLst)
-            csvStr = "PURITY (" + str(prt) + ") => Accuracy Rate :>>> " + str(statis[0]) + ", All Hits :>>> " + str(statis[1]) + ", All Misses :>>> " + str(statis[2]) + ", All Records :>>> " + str(statis[3])
-            csvWriter(csvStr + "\n")
+            csvStr = str(prt) + "," + str(constant_data_records) + "," + str(constant_depth) + "," + str(statis[0])  + "," + str(statis[1]) + "," + str(statis[2]) + "," + str(statis[3]) + "\n"
+            csvWriter(csvStr)
 
      
 """
@@ -458,7 +458,7 @@ def n_fold_cross_validation(fileName, cluster_divisions):
 
 
 if __name__ == "__main__":
-    fileName = "C:/Users/nikhi/OneDrive/RIT/7th Semester/Principles of Data Mining/Data-Mining/hw-05/Abominable_Data_HW05_v725.csv"
+    fileName = "hw-05/Abominable_Data_HW05_v725.csv"
     # fileName = "Abominable_Data_HW05_v725.csv"
     n_fold_cross_validation(fileName, 10)
     # main()
