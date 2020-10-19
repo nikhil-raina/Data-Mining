@@ -20,3 +20,20 @@ def csv_parser():
     displayList = list()
     for count in range(len(book["age"])):
         if book["tailLn"][count] <= 10:
+            if book["tailLn"][count] <= 8:
+                if book["bangLn"][count] <= 4:
+                    displayList.append(1)
+                else:
+                    displayList.append(1)
+            else:
+                if book["hairLn"][count] <= 9:
+                    displayList.append(1)
+                else:
+                    displayList.append(1)
+        else:
+            if book["hairLn"][count] <= 10:
+                if book["bangLn"][count] <= 5:
+                    displayList.append(-1)
+                else:
+                    displayList.append(-1)
+            else:
