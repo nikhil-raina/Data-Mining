@@ -8,6 +8,7 @@ based on the cost.
 import pandas as pd
 import numpy as np
 import textwrap
+from importlib import reload
 
 
 """
@@ -375,7 +376,7 @@ Implements the N Fold Cross Validation algorithm for the dataset its been given
 """
 def n_fold_algorithm(df_lst):
     purity_lst = [0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 0.96, 0.98]
-    data_record_lst = [30, 25, 20, 15, 10, 8, 6, 5, 4, 3, 2]
+    data_record_lst = [30, 25, 20, 15, 10, 8, 6, 5, 4, 3]
     depth_level_lst = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     constant_data_records = 10      # constant data record number as mentioned in the document
     constant_purity = 0.95          # constant purity number as mentioned in the document
@@ -403,7 +404,8 @@ def n_fold_algorithm(df_lst):
 
             make_csv(test_dataframe)
             trained_file = __import__("trained_file")
-            resultLst = trained_file.csv_parser()
+            foo = reload(trained_file)
+            resultLst = foo.csv_parser()
             statis = calculate_accuracy("hw-05/testing_file.csv", resultLst)
             csvStr = str(constant_purity)+ "," + str(constant_data_records) + "," + str(depth) + "," + str(statis[0])  + "," + str(statis[1]) + "," + str(statis[2]) + "," + str(statis[3]) +"\n"
             csvWriter(csvStr)
@@ -421,7 +423,8 @@ def n_fold_algorithm(df_lst):
 
             make_csv(test_dataframe)
             trained_file = __import__("trained_file")
-            resultLst = trained_file.csv_parser()
+            foo = reload(trained_file)
+            resultLst = foo.csv_parser()
             statis = calculate_accuracy("hw-05/testing_file.csv", resultLst)
             csvStr = str(constant_purity)+ "," + str(dataRec) + "," + str(constant_depth) + "," + str(statis[0])  + "," + str(statis[1]) + "," + str(statis[2]) + "," + str(statis[3]) +"\n"
             csvWriter(csvStr)
@@ -439,7 +442,8 @@ def n_fold_algorithm(df_lst):
 
             make_csv(test_dataframe)
             trained_file = __import__("trained_file")
-            resultLst = trained_file.csv_parser()
+            foo = reload(trained_file)
+            resultLst = foo.csv_parser()
             statis = calculate_accuracy("hw-05/testing_file.csv", resultLst)
             csvStr = str(prt) + "," + str(constant_data_records) + "," + str(constant_depth) + "," + str(statis[0])  + "," + str(statis[1]) + "," + str(statis[2]) + "," + str(statis[3]) + "\n"
             csvWriter(csvStr)
