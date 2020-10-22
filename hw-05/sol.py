@@ -366,9 +366,46 @@ def make_csv(df_lst):
 Function stores the results of the current N Fold Cross Validation sequence
 """
 def csvWriter(st):
-    file = open("hw-05/output_results_file.csv", "a")
+    file = open("hw-05/output_final_results_file.csv", "a")
     file.write(st)
     file.close()
+
+
+"""
+Final classification method that taken in the best values to give out the most efficient classifier.
+"""
+def final_classification(purity, depth, data_rec, fileName, cluster_divisions):
+
+    large_dataFrame = make_dataFrame(fileName)    
+    large_array = large_dataFrame.to_numpy()
+    splitted = np.split(large_array, cluster_divisions)
+
+    df_lst = makee_split_df(splitted)         # contains the number of dataframes as per cluster_division
+
+    for idx in range(0, len(df_lst)):
+        test_dataframe = df_lst[idx]                             # dataFrame for testing            (1)  
+        train_dataFrame_lst = df_lst[:idx] + df_lst[idx+1 : ]       # training data frames lst 
+        train_dataFrame = pd.concat(train_dataFrame_lst)            # make it into a big train dataset (9)
+
+        ######################################################################################
+        ## THIS FOLLOWING BLOCK OF CODE IS FOR MAKE DECISION TREE WITH OUR SELECTED DATAFRAME
+        book = round_data(train_dataFrame)
+       
+        book["class"] = train_dataFrame["Class"].tolist()
+        target_attr_categories = train_dataFrame["Class"].unique().tolist()
+        file_obj = program_writer()
+        tab_sequence = 2
+
+        decision_tree_start(book, tab_sequence, target_attr_categories, file_obj, 0, purity, depth, data_rec)      # generate the tree
+        ####################################################################################
+
+        make_csv(test_dataframe)
+        trained_file = __import__("trained_file")
+        foo = reload(trained_file)
+        resultLst = foo.csv_parser()
+        statis = calculate_accuracy("hw-05/testing_file.csv", resultLst)
+        csvStr = str(purity)+ "," + str(data_rec) + "," + str(depth) + "," + str(statis[0])  + "," + str(statis[1]) + "," + str(statis[2]) + "," + str(statis[3]) +"\n"
+        csvWriter(csvStr)
 
 
 """
@@ -464,5 +501,6 @@ def n_fold_cross_validation(fileName, cluster_divisions):
 if __name__ == "__main__":
     fileName = "hw-05/Abominable_Data_HW05_v725.csv"
     # fileName = "Abominable_Data_HW05_v725.csv"
-    n_fold_cross_validation(fileName, 10)
+    # n_fold_cross_validation(fileName, 10)
+    final_classification(0.9, 9, 4, fileName, 10)
     # main()
