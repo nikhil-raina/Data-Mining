@@ -32,16 +32,18 @@ def file_writer(file_name, str):
     
 # header and footer of kml of the KML File
 def kml_static_text(kml_file, static_text):
-    with open(kml_file) as file:
-        for _ in range(5):
-            next(file)
+    with open(kml_file) as file:    
+        for _ in range(5):      # skips the first few 5 lines
+            next(file)          
         for line in file:
             try:
                 msg = nmea.parse(line)
-                msgTime = msg.timestamp
-                latitude = msg.latitude
-                longitude = msg.lon
-                print(msg)
+                latitude = round(msg.latitude, 6)
+                longitude = round(msg.longitude, 6)
+                alt = (msg.altitude)
+                output = str(longitude) + "," + str(latitude) + "," + str(alt)                
+                print(output)
+                break
             except nmea.ParseError as e:
                 print('Parse error: {}'.format(e))
                 continue            
