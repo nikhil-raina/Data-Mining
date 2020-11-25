@@ -1,4 +1,5 @@
 import sys
+import pynmea2 as nmea
 
 kml_header = " "    # read the text file having the header txt
 kml_footer = " "    
@@ -31,11 +32,19 @@ def file_writer(file_name, str):
     
 # header and footer of kml of the KML File
 def kml_static_text(kml_file, static_text):
-    fileObj = open(static_text, "r")
-    data = fileObj.read()
-    file_writer(kml_file, data)
-
-    
+    with open(kml_file) as file:
+        for _ in range(5):
+            next(file)
+        for line in file:
+            try:
+                msg = nmea.parse(line)
+                msgTime = msg.timestamp
+                latitude = msg.latitude
+                longitude = msg.lon
+                print(msg)
+            except nmea.ParseError as e:
+                print('Parse error: {}'.format(e))
+                continue            
 
 # entry point of the program
 def main():
@@ -44,8 +53,8 @@ def main():
         exit()
 
     gps_file, kml_file = sys.argv[1], sys.argv[2]           # get the 2 file names
-
-    kml_static_text(kml_file, "helper/kml_header.txt")      # generates the header of the kml
+    
+    kml_static_text(gps_file, "helper/kml_header.txt")      # generates the header of the kml
 
 
     # kml_static_text (kml_file, "helper/kml_footer.txt")     # generates the footer of the kml 
@@ -53,3 +62,4 @@ def main():
 
 
 main()
+
