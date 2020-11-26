@@ -36,10 +36,8 @@ def file_writer(file_name, str):
 # header and footer of kml of the KML File
 def kml_static_text(kml_file, header_txt, footer_txt, new_kml):
     
-    header = open(header_txt, "r").read()
-    print(header)
-    break
-
+    header = open(header_txt, "r").read()   # reads the header of kml file
+    file_writer(new_kml, header)            # writes the header of kml file
 
     with open(kml_file) as file:    
         for _ in range(5):      # skips the first few 5 lines
@@ -52,15 +50,20 @@ def kml_static_text(kml_file, header_txt, footer_txt, new_kml):
                 
                 try:
                     alt = (msg.altitude)                        # altitude
-                    output = str(longitude) + "," + str(latitude) + "," + str(alt)   
-                    print(output)
+                    output = str(longitude) + "," + str(latitude) + "," + str(alt) + "\n"
+                    file_writer(new_kml, output)
                 except AttributeError as error:             # if the altitude is missing, than just continue (case: GPRMC)
-                    print("Missing Altitude")
+                    # print("Missing Altitude")
                     continue
                                 
             except nmea.ParseError as e:
                 print('Parse error: {}'.format(e))
-                continue  
+                continue 
+    
+
+    footer = open(footer_txt, "r").read()
+    file_writer(new_kml, footer)
+    print("Successfully Completed")
               
 
 # entry point of the program
