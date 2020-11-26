@@ -11,6 +11,9 @@ kml_footer = " "
 # TODO: Handle case when the Car not Moving
 # TODO: Find speed of the car
 
+
+##### Parsing
+
 # Takes input of a coordinate and dump it to the text file
 def print_coords(fileName, coord):
     return True
@@ -38,12 +41,19 @@ def kml_static_text(kml_file, static_text):
         for line in file:
             try:
                 msg = nmea.parse(line)
-                latitude = round(msg.latitude, 6)
-                longitude = round(msg.longitude, 6)
-                alt = (msg.altitude)
-                output = str(longitude) + "," + str(latitude) + "," + str(alt)                
-                print(output)
-                break
+                latitude = round(msg.latitude, 6)           # latitude in 6 decimal
+                longitude = round(msg.longitude, 6)         # longitude in 6 decimal
+                
+                try:
+                    alt = (msg.altitude)                        # altitude
+                    output = str(longitude) + "," + str(latitude) + "," + str(alt)   
+                    print(output)
+                except AttributeError as error:             # if the altitude is missing, than just continue (case: GPRMC)
+                    print("Missing Altitude")
+                    continue
+                       
+                # output = str(longitude) + "," + str(latitude) + ","             
+                                
             except nmea.ParseError as e:
                 print('Parse error: {}'.format(e))
                 continue            
