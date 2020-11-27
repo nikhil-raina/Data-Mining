@@ -3,7 +3,7 @@
 <Document>
 <Style id="yellowPoly">
   <LineStyle>
-    <color>Af00ffff</color>
+    <color>50F0FF14</color>
     <width>6</width>
   </LineStyle>
   <PolyStyle>

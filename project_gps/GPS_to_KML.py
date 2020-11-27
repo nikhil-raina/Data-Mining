@@ -45,6 +45,7 @@ def kml_static_text(kml_file, header_txt, footer_txt, new_kml):
         for line in file:
             try:
                 msg = nmea.parse(line)
+                
                 latitude = round(msg.latitude, 6)           # latitude in 6 decimal
                 longitude = round(msg.longitude, 6)         # longitude in 6 decimal
                 
