@@ -1,8 +1,10 @@
 import sys
 import pynmea2 as nmea
+import pandas as pd
 
 kml_header = " "    # read the text file having the header txt
 kml_footer = " "    
+bigDataframe  = pd.DataFrame(columns=["IDen", "Time", "Latitude", "Longitutde", "Altitude"])
 
 # TODO: Handle Parked Car
 # TODO: Driving in Straight line, ignore some points
@@ -11,52 +13,62 @@ kml_footer = " "
 # TODO: Handle case when the Car not Moving
 # TODO: Find speed of the car
 
-
-##### Parsing
-
-# Takes input of a coordinate and dump it to the text file
-def print_coords(fileName, coord):
-    return True
-
-# reads the text file, outputs the kml file
-def reader(txt_file, kml_file):
-    return 0
-
-# Detects the anomalies # maybe helper funciton?  
-def anomaly_detector():
-    return 0
-
 # this function appends string to specified file
 def file_writer(file_name, str):
     file = open(file_name, "a")
     file.write(str)
     file.close()
 
+
+def gpgga(msg, new_kml):
+    latitude = round(msg.latitude, 6)           # latitude in 6 decimal
+    latitude = format(latitude, ".6f")          # to add padding 0
+
+    longitude = round(msg.longitude, 6)         # longitude in 6 decimal
+    longitude = format(longitude, ".6f")        # to add padding 0
+
+    alt = (msg.altitude)                        # altitude
+    curTime = msg.timestamp
+
+    output = str(longitude) + "," + str(latitude) + "," + str(alt) + "\n"
+    
+    rowToAppend = ["$GPGGA", curTime, latitude, longitude, alt] 
+    
+    cur_df_size = len(bigDataframe)
+    bigDataframe.loc[cur_df_size] = rowToAppend
+    file_writer(new_kml, output)
+
+def grmc(msg):
+    latitude = round(msg.latitude, 6)           # latitude in 6 decimal
+    latitude = format(latitude, ".6f")          # to add padding 0
+
+    longitude = round(msg.longitude, 6)         # longitude in 6 decimal
+    longitude = format(longitude, ".6f")        # to add padding 0
+    curTime = msg.timestamp
+
+    rowToAppend = ["$GPRMC", curTime, latitude, longitude, 0]
+     
+    cur_df_size = len(bigDataframe)
+    bigDataframe.loc[cur_df_size] = rowToAppend
+    
     
 # header and footer of kml of the KML File
 def kml_static_text(kml_file, header_txt, footer_txt, new_kml):
-    
     header = open(header_txt, "r").read()   # reads the header of kml file
     file_writer(new_kml, header)            # writes the header of kml file
-
-    with open(kml_file) as file:    
+    with open(kml_file) as file:  
         for _ in range(5):      # skips the first few 5 lines
             next(file)          
         for line in file:
             try:
-                
                 msg = nmea.parse(line)
-                latitude = round(msg.latitude, 6)           # latitude in 6 decimal
-                longitude = round(msg.longitude, 6)         # longitude in 6 decimal
-                
-                try:
-                    alt = (msg.altitude)                        # altitude
-                    output = str(longitude) + "," + str(latitude) + "," + str(alt) + "\n"
-                    file_writer(new_kml, output)
-                except AttributeError as error:             # if the altitude is missing, than just continue (case: GPRMC)
-                    # print("Missing Altitude")
-                    continue
-                                
+                splitted = line.split(",")
+                if splitted[0] == "$GPGGA":
+                    print("GGA Sentence")
+                    gpgga(msg, new_kml)
+                else:
+                    print("RMC sentence")
+                    grmc(msg)
             except nmea.ParseError as e:
                 print('Parse error: {}'.format(e))
                 continue 
@@ -84,3 +96,22 @@ def main():
 
 main()
 
+
+
+
+
+
+
+##### Parsing
+
+# Takes input of a coordinate and dump it to the text file
+def print_coords(fileName, coord):
+    return True
+
+# reads the text file, outputs the kml file
+def reader(txt_file, kml_file):
+    return 0
+
+# Detects the anomalies # maybe helper funciton?  
+def anomaly_detector():
+    return 0
