@@ -22,20 +22,38 @@ def file_writer(file_name, str):
 
 def gpgga(msg, new_kml):
     latitude = round(msg.latitude, 6)           # latitude in 6 decimal
+    latitude = format(latitude, ".6f")          # to add padding 0
+
     longitude = round(msg.longitude, 6)         # longitude in 6 decimal
+    longitude = format(longitude, ".6f")        # to add padding 0
+
     alt = (msg.altitude)                        # altitude
+    curTime = msg.timestamp
+
     output = str(longitude) + "," + str(latitude) + "," + str(alt) + "\n"
+    
+    rowToAppend = ["$GPGGA", curTime, latitude, longitude, alt] 
+    
+    cur_df_size = len(bigDataframe)
+    bigDataframe.loc[cur_df_size] = rowToAppend
     file_writer(new_kml, output)
-    return 0
 
 def grmc(msg):
-    return 0
+    latitude = round(msg.latitude, 6)           # latitude in 6 decimal
+    latitude = format(latitude, ".6f")          # to add padding 0
+
+    longitude = round(msg.longitude, 6)         # longitude in 6 decimal
+    longitude = format(longitude, ".6f")        # to add padding 0
+    curTime = msg.timestamp
+
+    rowToAppend = ["$GPRMC", curTime, latitude, longitude, 0]
+     
+    cur_df_size = len(bigDataframe)
+    bigDataframe.loc[cur_df_size] = rowToAppend
     
     
 # header and footer of kml of the KML File
 def kml_static_text(kml_file, header_txt, footer_txt, new_kml):
-    
-    
     header = open(header_txt, "r").read()   # reads the header of kml file
     file_writer(new_kml, header)            # writes the header of kml file
     with open(kml_file) as file:  
