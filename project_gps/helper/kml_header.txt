@@ -3,11 +3,11 @@
 <Document>
 <Style id="yellowPoly">
   <LineStyle>
-    <color>50F0FF14</color>
-    <width>6</width>
+    <color>64F0FF14</color>
+    <width>10</width>
   </LineStyle>
   <PolyStyle>
-    <color>7f00ff00</color>
+    <color>64F0FF14</color>
   </PolyStyle>
 </Style>
 <Placemark><styleUrl>#yellowPoly</styleUrl>
