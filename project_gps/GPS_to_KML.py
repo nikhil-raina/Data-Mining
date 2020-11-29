@@ -87,7 +87,7 @@ def read_all_GPS_data():
 def read_input_data(gps_file, kml_file):
     gps_data = read_gps_data(gps_file)
     processed_data_df = preprocessor(gps_data)
-    with open(output_file, 'w') as out:
+    with open(kml_file, 'w') as out:
             header = open('project_gps/helper/kml_header.txt','r')
             out.write(header.read()+'\n')
             header.close()
