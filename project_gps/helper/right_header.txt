@@ -1,0 +1,6 @@
+    <Placemark>
+        <name>Right</name>
+        <description>Right turns on streets</description>
+        <styleUrl>#right</styleUrl>
+        <Point>
+            <coordinates>
