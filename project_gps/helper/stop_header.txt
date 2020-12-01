@@ -1,6 +1,0 @@
-    <Placemark>
-        <name>Stop</name>
-        <description>Stop lights on streets</description>
-        <styleUrl>#stop</styleUrl>
-        <Point>
-            <coordinates>
