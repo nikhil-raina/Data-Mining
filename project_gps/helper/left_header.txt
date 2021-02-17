@@ -1,0 +1,6 @@
+    <Placemark>
+        <name>Left</name>
+        <description>Left turns on streets</description>
+        <styleUrl>#left</styleUrl>
+        <Point>
+            <coordinates>
